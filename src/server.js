@@ -1,6 +1,7 @@
 import express from "express";
 import bodyParser from "body-parser";
 import { MongoClient } from "mongodb";
+import path from 'path'
 
 // const articlesInfo = {
 //   "learn-react": {
@@ -18,13 +19,17 @@ import { MongoClient } from "mongodb";
 // };
 
 const app = express();
+app.use(express.static(path.join(__dirname, '/build')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.json());
 
 const withDB = async (operations, res) => {
   try {
-    const client = await MongoClient.connect("url", { useNewUrlParser: true });
+    const client = await MongoClient.connect(
+      "<MongoAtlas url",
+      { useNewUrlParser: true }
+    );
     const db = client.db("myFirstDatabase");
     await operations(db);
     client.close();
@@ -114,5 +119,9 @@ app.post("/api/articles/:name/add-comment", async (req, res) => {
     res.status(200).json(updateArticleInfo);
   }, res);
 });
+
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname + '/build/index.html'));
+})
 
 app.listen(8000, () => console.log("Listening on port 8000"));
